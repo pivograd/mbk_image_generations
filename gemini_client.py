@@ -4,7 +4,7 @@ from typing import Tuple, Dict, Any
 
 from aiohttp import ClientSession
 
-from config import GEMINI_API_KEY, GEMINI_API_URL, GEMINI_MODEL
+from config import GEMINI_API_KEY, GEMINI_API_URL_TEXT, GEMINI_API_URL_IMAGE
 from logger import send_log_to_telegram
 
 
@@ -48,22 +48,16 @@ async def call_gemini_with_image(session: ClientSession, image_b64: str, mime_ty
             {
                 "parts": parts
             }
-        ]
-    }
-
-    if "image" in GEMINI_MODEL:
-        body["generationConfig"] = {
+        ],
+        "generationConfig": {
             "responseModalities": ["IMAGE"]
         }
-    else:
-        body["generationConfig"] = {
-            "response_mime_type": "application/json"
-        }
+    }
 
     params = {"key": GEMINI_API_KEY}
 
     async with session.post(
-        GEMINI_API_URL,
+        GEMINI_API_URL_IMAGE,
         params=params,
         json=body,
         timeout=120,
@@ -99,7 +93,7 @@ async def call_gemini_text(session: ClientSession, prompt: str) -> Dict[str, Any
     params = {"key": GEMINI_API_KEY}
 
     async with session.post(
-        GEMINI_API_URL,
+        GEMINI_API_URL_TEXT,
         params=params,
         json=body,
         timeout=120,
