@@ -5,6 +5,7 @@ from typing import Tuple, Dict, Any
 from aiohttp import ClientSession
 
 from config import GEMINI_API_KEY, GEMINI_API_URL, GEMINI_MODEL
+from logger import send_log_to_telegram
 
 
 async def fetch_image_as_base64(session: ClientSession, url: str) -> Tuple[str, str]:
@@ -67,6 +68,7 @@ async def call_gemini_with_image(session: ClientSession, image_b64: str, mime_ty
         json=body,
         timeout=120,
     ) as resp:
+        await send_log_to_telegram(f'[call_gemini_with_image]\nGemini response: {await resp.json()}', 'INFO')
         text = await resp.text()
         if resp.status != 200:
             raise RuntimeError(f"Ошибка от Gemini API: статус {resp.status}, тело: {text}")
