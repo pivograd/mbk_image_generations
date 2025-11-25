@@ -15,5 +15,6 @@ async def generate_image_from_url(session: ClientSession, image_url: str, mode: 
     if not image_b64:
         await send_log_to_telegram(f'[generate_image_from_url]\nНет изображения!\ndata: {image_url}', 'ERROR')
         raise Exception('Нет изображения!')
+    await send_log_to_telegram(f'[call_gemini_with_image]\n!\nimage_b64: {image_b64}', 'INFO')
     result = await call_gemini_with_image(session, image_b64, mime_type, prompt)
     return result

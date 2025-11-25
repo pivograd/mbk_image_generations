@@ -11,7 +11,7 @@ TG_MESSAGE_LIMIT = 4096
 async def send_log_to_telegram(message: str, log_level: str = "INFO"):
 
     if len(message) > TG_MESSAGE_LIMIT:
-        message = message[:TG_MESSAGE_LIMIT - 150] + "\n... [обрезано]"
+        message = message[:TG_MESSAGE_LIMIT - 1500] + "\n... [обрезано]"
 
     chat_id = error if log_level == "ERROR" else info
 
