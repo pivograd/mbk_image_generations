@@ -3,6 +3,7 @@ import json
 from aiohttp import ClientSession
 
 from gemini_client import call_gemini_text
+from logger import send_log_to_telegram
 from prompts import build_extra_prompts_prompt
 
 
@@ -35,9 +36,4 @@ async def generate_extra_prompts(
     if not isinstance(parsed, list):
         raise RuntimeError(f"Ожидался JSON-массив, получено: {type(parsed)}")
 
-    variants = [str(x) for x in parsed]
-
-    if len(variants) > 3:
-        variants = variants[:3]
-
-    return variants
+    return parsed
