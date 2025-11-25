@@ -1,6 +1,6 @@
 import base64
 import json
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, Optional
 
 from aiohttp import ClientSession
 
@@ -8,22 +8,25 @@ from config import GEMINI_API_KEY, GEMINI_API_URL_TEXT, GEMINI_API_URL_IMAGE
 from logger import send_log_to_telegram
 
 
-async def fetch_image_as_base64(session: ClientSession, url: str) -> Tuple[str, str]:
+async def fetch_image_as_base64(session: ClientSession, url: str) -> Optional[tuple[str, str]]:
     """
     Скачивает изображение по URL и возвращает (base64, mime_type).
     """
-    async with session.get(url, timeout=60) as resp:
-        if resp.status != 200:
-            text = await resp.text()
-            raise RuntimeError(
-                f"Не удалось скачать изображение: статус {resp.status}, тело: {text}"
-            )
+    try:
+        async with session.get(url, timeout=60) as resp:
+            if resp.status != 200:
+                text = await resp.text()
+                raise RuntimeError(
+                    f"Не удалось скачать изображение: статус {resp.status}, тело: {text}"
+                )
 
-        content_type = resp.headers.get("Content-Type", "image/jpeg")
-        data = await resp.read()
+            content_type = resp.headers.get("Content-Type", "image/jpeg")
+            data = await resp.read()
 
-    b64 = base64.b64encode(data).decode("ascii")
-    return b64, content_type
+        b64 = base64.b64encode(data).decode("ascii")
+        return b64, content_type
+    except Exception as e:
+        await send_log_to_telegram(f'[fetch_image_as_base64]\nОшибка при скачивании изображения\n\n{e}', 'ERROR')
 
 
 async def call_gemini_with_image(session: ClientSession, image_b64: str, mime_type: str, prompt: str) -> Dict[str, Any]:
@@ -62,7 +65,6 @@ async def call_gemini_with_image(session: ClientSession, image_b64: str, mime_ty
         json=body,
         timeout=120,
     ) as resp:
-        await send_log_to_telegram(f'[call_gemini_with_image]\nGemini response: {await resp.json()}', 'INFO')
         text = await resp.text()
         if resp.status != 200:
             raise RuntimeError(f"Ошибка от Gemini API: статус {resp.status}, тело: {text}")
