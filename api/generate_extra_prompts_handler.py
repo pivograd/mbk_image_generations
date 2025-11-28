@@ -26,6 +26,7 @@ async def generate_extra_prompts_handler(request: web.Request) -> web.Response:
             await send_log_to_telegram(f'[generate_extra_prompts_handler]\nНет исходного изображения!\ndata: {data}', 'ERROR')
             return web.json_response({"error": "image_url is required"}, status=400)
         result = await generate_image_from_url(session=session, image_url=image_url, mode=mode)
+        await send_log_to_telegram(f'[generate_extra_prompts_handler]\nAPI RESPONSE:\nresult_variants: {variants}\nresult_image: {result}', 'INFO')
         return web.json_response({"result_image": result, 'result_variants': variants})
     except UnknownPromptModeError as e:
         await send_log_to_telegram(f'[generate_extra_prompts_handler]\nОШИБКА Unknown mode!\n\n{str(e)}', 'ERROR')
